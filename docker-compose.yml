@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  jobpulse-ai:
+    build: .
+    container_name: jobpulse_ai_platform
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./jobpulse.db:/app/jobpulse.db
+    restart: always

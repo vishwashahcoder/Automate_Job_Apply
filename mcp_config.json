@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "JobPulseAI": {
+      "command": "python",
+      "args": [
+        "c:/vishwa/auto_search/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "GEMINI_API_KEY": ""
+      }
+    }
+  }
+}

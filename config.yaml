@@ -1,0 +1,54 @@
+preferences:
+  job_titles:
+  - Python Developer
+  - AI Engineer
+  locations:
+  - Remote
+  - Worldwide
+  experience_level: Mid-Level
+  platforms:
+  - company_careers
+  - linkedin
+  - instahyre
+  - naukri
+  - indeed
+  - wellfound
+  - cutshort_hirist
+  - weworkremotely
+  - flexjobs
+  - remote_co
+resume_profile:
+  full_name: ""
+  email: ""
+  phone: ""
+  location: "Remote, Worldwide"
+  portfolio_url: ""
+  linkedin_url: ""
+  years_experience: 1
+  last_position: "AI Engineer"
+  skills:
+  - Python
+  - FastAPI
+  - PyTorch
+  - LangChain
+  - RAG
+  - Docker
+  - LLM
+  - REST APIs
+  summary: "Software & AI Engineer specializing in Python, LLM orchestration, and modern backend architectures."
+  resume_pdf_path: ""
+  resume_filename: ""
+  missing_fields: []
+notification:
+  mode: cli
+  phone_number: ""
+matching:
+  min_fit_score: 50
+credentials:
+  aws_region: us-east-1
+  aws_access_key_id: ""
+  aws_secret_access_key: ""
+  triage_model_id: us.amazon.nova-lite-v1:0
+  drafting_model_id: us.amazon.nova-pro-v1:0
+  linkedin_email: ''
+  linkedin_password: ''

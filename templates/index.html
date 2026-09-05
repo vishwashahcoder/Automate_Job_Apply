@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobPulse AI - Multi-Platform Live Job Aggregator</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="nav-container">
+      <div class="brand-logo">
+        <span class="brand-icon"><i class="fa-solid fa-bolt"></i></span>
+        <span>JobPulse AI</span>
+      </div>
+
+      <!-- Quick Natural Language Prompt Bar -->
+      <div class="header-search-box">
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-wand-magic-sparkles search-input-icon"></i>
+          <input type="text" id="headerPromptInput" class="form-control prompt-input" 
+                 placeholder="e.g. Remote Senior AI Engineer jobs above $120k posted this week..."
+                 onkeypress="if(event.key==='Enter') applyPromptAndSearch()">
+          <button class="btn btn-sm btn-accent" onclick="applyPromptAndSearch()" title="Parse Prompt & Search">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <a id="navViewResumeBtn" href="/api/download-resume" target="_blank" class="btn btn-secondary" style="display: none; text-decoration: none;">
+          <i class="fa-solid fa-file-pdf"></i> Resume
+        </a>
+        <button class="btn btn-secondary" onclick="openProfileModal()">
+          <i class="fa-solid fa-user-gear"></i> Profile & Resume
+        </button>
+        <button class="btn btn-primary" id="searchBtn" onclick="triggerJobSearch()">
+          <i class="fa-solid fa-magnifying-glass"></i> Search 10 Portals
+        </button>
+        <button class="btn btn-danger" id="stopBtn" onclick="stopJobSearch()" style="display: none;">
+          <i class="fa-solid fa-stop"></i> Stop
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-container">
+
+    <!-- Interactive Search & Multi-Filter Control Center -->
+    <div class="filter-control-card">
+      <div class="filter-card-header">
+        <div class="filter-header-title">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Multi-Platform Search & Filters</span>
+        </div>
+        <div class="filter-header-actions">
+          <button class="btn btn-sm btn-ghost" onclick="resetFilters()">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+          </button>
+          <button class="btn btn-sm btn-primary" onclick="triggerJobSearch()">
+            <i class="fa-solid fa-filter"></i> Apply Filters
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-grid">
+        <!-- Keyword / Role Input -->
+        <div class="filter-field">
+          <label><i class="fa-solid fa-briefcase"></i> Job Title / Tech Stack</label>
+          <input type="text" id="filterQuery" class="form-control" placeholder="e.g. AI Engineer, Python, React">
+        </div>
+
+        <!-- Location Input -->
+        <div class="filter-field">
+          <label><i class="fa-solid fa-location-dot"></i> Target Location</label>
+          <input type="text" id="filterLocation" class="form-control" placeholder="e.g. Remote, London, Pune, Worldwide">
+        </div>
+
+        <!-- Seniority Selector -->
+        <div class="filter-field">
+          <label><i class="fa-solid fa-layer-group"></i> Seniority Level</label>
+          <select id="filterSeniority" class="form-control">
+            <option value="All">All Seniority Levels</option>
+            <option value="Entry">Entry Level / Fresher</option>
+            <option value="Mid-Level">Mid-Level (1-3 yrs)</option>
+            <option value="Senior">Senior (3-6 yrs)</option>
+            <option value="Lead">Lead / Principal / Director</option>
+          </select>
+        </div>
+
+        <!-- Date Posted Freshness -->
+        <div class="filter-field">
+          <label><i class="fa-solid fa-clock"></i> Date Posted</label>
+          <select id="filterDatePosted" class="form-control">
+            <option value="">Anytime</option>
+            <option value="1">Past 24 Hours</option>
+            <option value="7">Past 7 Days</option>
+            <option value="30">Past 30 Days</option>
+          </select>
+        </div>
+
+        <!-- Min Salary Expectation -->
+        <div class="filter-field">
+          <label><i class="fa-solid fa-money-bill-wave"></i> Min Salary Expectation</label>
+          <div style="display: flex; gap: 6px;">
+            <select id="filterSalaryCurrency" class="form-control" style="width: 85px; flex-shrink: 0; padding-left: 6px; padding-right: 4px;">
+              <option value="INR">₹ LPA</option>
+              <option value="USD">$ USD</option>
+            </select>
+            <input type="number" id="filterMinSalary" class="form-control" placeholder="e.g. 15 (LPA) or 90000 ($)" min="0" step="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Filter Row: Platforms, Remote, Min Score -->
+      <div class="filter-secondary-row">
+        <!-- Platform Selection Chips (10 Portals) -->
+        <div class="platform-chips-container">
+          <span class="chips-label"><i class="fa-solid fa-globe"></i> Portals:</span>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="company_careers" checked> Company Careers</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="linkedin" checked> LinkedIn</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="instahyre" checked> Instahyre</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="naukri" checked> Naukri.com</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="indeed" checked> Indeed</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="wellfound" checked> Wellfound</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="cutshort_hirist" checked> Cutshort / Hirist</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="weworkremotely" checked> We Work Remotely</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="flexjobs" checked> FlexJobs</label>
+          <label class="platform-chip"><input type="checkbox" name="platform" value="remote_co" checked> Remote.co</label>
+        </div>
+
+        <!-- Toggles & Sliders -->
+        <div class="filter-toggles-container">
+          <label class="toggle-switch-label">
+            <input type="checkbox" id="filterRemoteOnly">
+            <span class="toggle-slider"></span>
+            <span>Remote Only</span>
+          </label>
+
+          <div class="slider-wrapper" title="Minimum AI Fit Match Threshold">
+            <span>Min Fit: <strong id="minScoreLabel">40%</strong></span>
+            <input type="range" id="filterMinScore" min="0" max="90" step="5" value="40" oninput="updateMinScoreLabel(this.value)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Metrics Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>Unique Listings</h4>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-icon"><i class="fa-solid fa-compass"></i></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>High Fit Matches</h4>
+          <div class="stat-value" id="statHighMatch" style="color: var(--accent-success);">0</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-success);">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>Applications Tracked</h4>
+          <div class="stat-value" id="statApplied" style="color: var(--accent-secondary);">0</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(6, 182, 212, 0.1); color: var(--accent-secondary);">
+          <i class="fa-solid fa-paper-plane"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <h4>Live Portals</h4>
+          <div class="stat-value" id="statPortals" style="color: var(--accent-primary);">7 Active</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--accent-primary);">
+          <i class="fa-solid fa-network-wired"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Realtime SSE Activity Log Console -->
+    <div class="console-card">
+      <div class="console-header">
+        <span><span class="status-dot"></span> LIVE MULTI-PLATFORM DISCOVERY & CLUSTERING MONITOR</span>
+        <span id="sseStatus">Connected</span>
+      </div>
+      <div class="console-body" id="consoleLogs">
+        <div>[System] JobPulse AI Global Engine v3.0 online. 7 live portal connectors verified. Zero mock data.</div>
+      </div>
+    </div>
+
+    <!-- Tab Filter & Results Header -->
+    <div class="filter-bar">
+      <div class="filter-tabs">
+        <button class="tab-btn active" onclick="filterJobs('ALL', this)">All Listings</button>
+        <button class="tab-btn" onclick="filterJobs('HIGH_FIT', this)">🎯 High Fit (≥50%)</button>
+        <button class="tab-btn" onclick="filterJobs('SAVED', this)">⏳ Saved for Later</button>
+        <button class="tab-btn" onclick="filterJobs('APPLIED', this)">✅ Applied</button>
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">
+        Displaying <span id="jobCount" style="font-weight: 700; color: #fff;">0</span> unique opportunities
+      </div>
+    </div>
+
+    <!-- Jobs Grid Container -->
+    <div class="jobs-grid" id="jobsGrid">
+      <!-- Dynamic Job Cards Rendered via JS -->
+    </div>
+
+  </div>
+
+  <!-- Candidate Profile & Resume Modal -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-content" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h3 class="modal-title">🤖 Candidate Profile & Resume Setup</h3>
+        <button class="close-btn" onclick="closeProfileModal()">&times;</button>
+      </div>
+
+      <!-- Step 1: PDF Resume Upload -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label style="font-weight: 600; color: var(--accent-secondary); margin: 0;">
+            1. Upload PDF Resume (AI Agent Auto-Fills Profile)
+          </label>
+          <a id="modalViewResumeBtn" href="/api/download-resume" target="_blank" class="btn btn-secondary" style="display: none; padding: 4px 10px; font-size: 0.75rem; text-decoration: none;">
+            <i class="fa-solid fa-file-pdf"></i> View Uploaded Resume
+          </a>
+        </div>
+        
+        <div id="dropZone" style="border: 2px dashed rgba(6, 182, 212, 0.4); border-radius: 8px; padding: 20px; text-align: center; background: rgba(15, 23, 42, 0.6); cursor: pointer; transition: all 0.2s;" onclick="document.getElementById('pdfFileInput').click()">
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.2rem; color: var(--accent-secondary); margin-bottom: 6px;"></i>
+          <p style="font-size: 0.9rem; font-weight: 500;">Click or Drag & Drop PDF Resume Here</p>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Supports PDF format (.pdf)</p>
+          <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;" onchange="handleResumeUpload(event)">
+        </div>
+        <div id="uploadLoader" style="display: none; text-align: center; padding: 16px; color: var(--accent-secondary);">
+          <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+          <p style="margin-top: 8px; font-size: 0.85rem;">AI Agent extracting skills, experience, and role...</p>
+        </div>
+      </div>
+
+      <!-- Step 2: Editable Candidate Details -->
+      <form id="profileForm" onsubmit="saveProfileAndLaunch(event)">
+        <h4 style="color: var(--accent-secondary); margin-bottom: 12px;">2. Candidate Profile</h4>
+        
+        <div class="form-group">
+          <label style="font-size: 0.8rem;">Full Name</label>
+          <input type="text" id="profFullName" class="form-control" placeholder="Candidate full name" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-size: 0.8rem;">Email Address</label>
+            <input type="email" id="profEmail" class="form-control" placeholder="email@example.com" required>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.8rem;">Phone Number</label>
+            <input type="text" id="profPhone" class="form-control" placeholder="+1-xxx-xxx-xxxx" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-size: 0.8rem;">LinkedIn Profile URL</label>
+            <input type="url" id="profLinkedin" class="form-control" placeholder="https://linkedin.com/in/username">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.8rem;">GitHub / Portfolio URL</label>
+            <input type="url" id="profPortfolio" class="form-control" placeholder="https://github.com/username">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-size: 0.8rem;">Location</label>
+            <input type="text" id="profLocation" class="form-control" placeholder="e.g. Remote, London, Pune" required>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.8rem;">Last Position / Role</label>
+            <input type="text" id="profLastPosition" class="form-control" placeholder="e.g. AI Engineer" required>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.8rem;">Years of Experience</label>
+            <input type="number" id="profExp" class="form-control" placeholder="3" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem;">Core Technical Skills (comma separated)</label>
+          <input type="text" id="profSkills" class="form-control" placeholder="Python, FastAPI, Docker, LLMs, React..." required>
+        </div>
+
+        <div class="form-group">
+          <label style="font-size: 0.8rem;">Professional Summary</label>
+          <textarea id="profSummary" class="form-control" rows="2" placeholder="Brief career summary..."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i> Save Profile
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
